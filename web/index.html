@@ -7,7 +7,7 @@
 <style>
   :root {
     --bg:#07080c; --card:#12141c; --line:#1e2330; --text:#e8edf7; --muted:#8b93a7;
-    --gold:#f5b942; --cyan:#3ee0c6; --green:#5ee9a0; --red:#ff6b6b;
+    --gold:#f5b942; --cyan:#3ee0c6; --green:#5ee9a0;
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:"Segoe UI",system-ui,sans-serif;color:var(--text);
@@ -17,7 +17,7 @@
   .sub{color:var(--muted);margin-top:6px;font-size:14px}
   .hero{margin-top:20px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px}
   label{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
-  input,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);
+  input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);
     background:#0b0d12;color:var(--text);font-size:14px}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
   @media(max-width:700px){.row{grid-template-columns:1fr}}
@@ -26,8 +26,10 @@
     color:var(--cyan);font-weight:700;cursor:pointer}
   button.primary{background:linear-gradient(90deg,#c98a1a,var(--gold));color:#111;border-color:var(--gold)}
   button:disabled{opacity:.45;cursor:not-allowed}
+  button.danger{border-color:#ff6b6b;color:#ff6b6b}
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:18px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  .card label{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;margin-bottom:4px}
   .card b{font-size:17px;display:block;margin-top:4px}
   #mapCanvas{width:100%;max-width:520px;image-rendering:pixelated;border:1px solid var(--line);
     border-radius:8px;background:#131722;display:block;margin-top:10px}
@@ -35,13 +37,15 @@
   .legend{font-size:12px;color:var(--muted);margin-top:8px}
   .workers{margin-top:16px;font-size:13px;color:var(--muted)}
   .found{background:#2a2010;border:1px solid var(--gold);border-radius:12px;padding:14px;margin-top:16px;color:var(--gold)}
+  .mining{background:#0b1a18;border:1px solid var(--cyan);border-radius:12px;padding:14px;margin-top:14px}
+  .mining b{color:var(--cyan)}
   code{color:var(--cyan)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Bitcoin Puzzle <span>#71</span> Pool</h1>
-  <div class="sub">Wspólna mapa · lokalne GPU/CPU · 3 BTC dla znalazcy, reszta na skarbiec</div>
+  <div class="sub">Wszystko w przeglądarce — wpisz adres, kliknij mapę, zostaw kartę otwartą</div>
 
   <div class="hero">
     <div class="row">
@@ -50,47 +54,39 @@
         <input id="payout" placeholder="bc1q... lub 1...">
       </div>
       <div>
-        <label>Tryb liczenia (lokalnie)</label>
-        <select id="mode">
-          <option value="gpu">GPU / CUDA (szybko)</option>
-          <option value="cpu">CPU (wolniej, bez karty)</option>
-        </select>
-      </div>
-    </div>
-    <div class="row">
-      <div>
         <label>Nick</label>
-        <input id="nick" placeholder="np. Kuba-RTX5080">
-      </div>
-      <div>
-        <label>URL serwera API (puste = ta sama strona / Pages)</label>
-        <input id="serverUrl" value="" placeholder="https://puzzle71-pool.pages.dev">
+        <input id="nick" placeholder="np. Kuba">
       </div>
     </div>
     <div class="btns">
-      <button class="primary" id="btnStart">Start — weź kolejny kawałek</button>
-      <button id="btnWorker">Kopiuj komendę workera</button>
+      <button class="primary" id="btnStart">Start — następny wolny kawałek</button>
+      <button class="danger" id="btnStop" disabled>Stop</button>
     </div>
-    <div class="tip" id="workerCmd">Worker: <code>python worker.py http://127.0.0.1:8780 bc1... gpu</code></div>
+    <div class="tip">Nic nie instalujesz. Liczenie działa w tej karcie (CPU w przeglądarce). Po trafieniu: 3 BTC Tobie, reszta na skarbiec.</div>
+  </div>
+
+  <div id="miningBox" class="mining" hidden>
+    <b id="miningTitle">Liczenie…</b>
+    <div class="tip" id="miningStat">—</div>
   </div>
 
   <div class="cards">
     <div class="card"><label>Postęp puli</label><b id="pct">0%</b></div>
-    <div class="card"><label>Kwadraciki done</label><b id="done">0</b></div>
-    <div class="card"><label>Aktywne</label><b id="active">0</b></div>
+    <div class="card"><label>Przeszukane kwadr.</label><b id="done">0</b></div>
+    <div class="card"><label>Teraz liczy</label><b id="active">0</b></div>
     <div class="card"><label>Wolne</label><b id="free">0</b></div>
-    <div class="card"><label>Nagroda znalazcy</label><b id="reward">3 BTC</b></div>
-    <div class="card"><label>Skarbiec</label><b id="treasury">—</b></div>
+    <div class="card"><label>Twoja prędkość</label><b id="mySpeed">—</b></div>
+    <div class="card"><label>Twój wkład</label><b id="myKeys">0</b></div>
   </div>
 
   <div id="foundBox" class="found" hidden></div>
 
-  <div class="grid-title" style="margin-top:22px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.1em">
+  <div style="margin-top:22px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.1em">
     Mapa Puzzle #71 — kliknij wolny kwadracik
   </div>
   <canvas id="mapCanvas" width="50" height="50"></canvas>
-  <div class="tip" id="mapTip">Najedź / kliknij kwadracik</div>
-  <div class="legend">Ciemny=wolny · Niebieski=liczy ktoś · Zielony=przeszukany</div>
+  <div class="tip" id="mapTip">Najedź / kliknij wolny (ciemny) kwadracik</div>
+  <div class="legend">Ciemny=wolny · Niebieski=liczy · Zielony=gotowe</div>
 
   <div class="workers" id="workers"></div>
 </div>
@@ -103,10 +99,13 @@ let MAP_BINS = 2500;
 let workerId = localStorage.getItem("pool_worker_id") || ("w_" + Math.random().toString(36).slice(2, 10));
 localStorage.setItem("pool_worker_id", workerId);
 
+let searchWorker = null;
+let activeClaim = null;
+let myKeysTotal = 0;
+
 function apiBase() {
-  const v = document.getElementById("serverUrl").value.trim();
+  const v = document.getElementById("serverUrl")?.value?.trim();
   if (v) return v.replace(/\/+$/, "");
-  // Cloudflare Pages: API w /api na tej samej domenie
   return window.location.origin;
 }
 
@@ -114,6 +113,18 @@ async function api(path, data) {
   const opt = data ? {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)} : {};
   const r = await fetch(apiBase() + path, opt);
   return r.json();
+}
+
+async function register() {
+  const payout = document.getElementById("payout").value.trim();
+  if (!payout) throw new Error("Wpisz adres BTC");
+  await api("/api/register", {
+    worker_id: workerId,
+    name: document.getElementById("nick").value.trim() || workerId,
+    payout_address: payout,
+    mode: "browser",
+  });
+  return payout;
 }
 
 function drawMap(mapStatus) {
@@ -135,53 +146,134 @@ function binFromEvent(ev) {
   return y*MAP_SIDE+x;
 }
 
+function fmtSpeed(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(2) + " mln/s";
+  if (n >= 1e3) return (n/1e3).toFixed(1) + " tys/s";
+  return Math.round(n) + "/s";
+}
+
+function fmtKeys(n) {
+  if (n >= 1e9) return (n/1e9).toFixed(2) + " mld";
+  if (n >= 1e6) return (n/1e6).toFixed(1) + " mln";
+  return n.toLocaleString("pl-PL");
+}
+
+function stopMining() {
+  if (searchWorker) {
+    searchWorker.postMessage({cmd:"stop"});
+    searchWorker.terminate();
+    searchWorker = null;
+  }
+  activeClaim = null;
+  document.getElementById("btnStop").disabled = true;
+  document.getElementById("btnStart").disabled = false;
+  document.getElementById("miningBox").hidden = true;
+}
+
+async function startMining(claim, payout) {
+  stopMining();
+  activeClaim = claim;
+  document.getElementById("miningBox").hidden = false;
+  document.getElementById("miningTitle").textContent = `Liczenie kwadracika #${claim.bin_id}…`;
+  document.getElementById("btnStop").disabled = false;
+  document.getElementById("btnStart").disabled = true;
+
+  searchWorker = new Worker("./search-worker.js", { type: "module" });
+  searchWorker.onmessage = async (ev) => {
+    const m = ev.data;
+    if (m.type === "progress") {
+      myKeysTotal += 0;
+      document.getElementById("mySpeed").textContent = fmtSpeed(m.speed);
+      document.getElementById("miningStat").textContent =
+        `Sprawdzone: ${fmtKeys(m.checked)} · ${fmtSpeed(m.speed)} · zostaw kartę otwartą`;
+      await api("/api/progress", {
+        worker_id: workerId,
+        bin_id: claim.bin_id,
+        keys_done: m.checked,
+      });
+    }
+    if (m.type === "found") {
+      await api("/api/found", {
+        worker_id: workerId,
+        privkey: m.privkey,
+        hash160: m.hash160,
+        payout_address: payout,
+      });
+      alert("TRAFIENIE! Klucz: " + m.privkey);
+      stopMining();
+      refresh();
+    }
+    if (m.type === "done") {
+      myKeysTotal += m.checked;
+      document.getElementById("myKeys").textContent = fmtKeys(myKeysTotal);
+      await api("/api/complete", {
+        worker_id: workerId,
+        bin_id: claim.bin_id,
+        keys_done: m.checked,
+      });
+      document.getElementById("miningStat").textContent =
+        `Kwadracik #${claim.bin_id} zakończony (${fmtKeys(m.checked)} kluczy)`;
+      stopMining();
+      refresh();
+      setTimeout(() => beginClaim(null), 800);
+    }
+  };
+  searchWorker.onerror = (e) => {
+    document.getElementById("miningStat").textContent = "Błąd workera: " + e.message;
+    stopMining();
+  };
+
+  searchWorker.postMessage({
+    cmd: "start",
+    start: claim.start,
+    end: claim.end,
+    target: claim.target,
+    maxKeys: 800000,
+  });
+}
+
+async function beginClaim(bin_id) {
+  try {
+    const payout = await register();
+    const res = await api("/api/claim", { worker_id: workerId, bin_id: bin_id ?? undefined });
+    if (res.status === "found") {
+      alert("Ktoś już znalazł klucz!");
+      refresh();
+      return;
+    }
+    if (res.status !== "ok") {
+      alert(res.error || res.message || "Brak wolnych kwadracików");
+      return;
+    }
+    await startMining(res, payout);
+    refresh();
+  } catch (e) {
+    alert(e.message || e);
+  }
+}
+
 canvas.addEventListener("mousemove", ev => {
   if (!statusData) return;
   const id = binFromEvent(ev);
   const st = statusData.map_status[id];
-  const names = ["wolny","aktywny","przeszukany"];
-  document.getElementById("mapTip").textContent = `Kwadracik #${id} — ${names[st]||"?"}`;
+  document.getElementById("mapTip").textContent =
+    `Kwadracik #${id} — ${["wolny","liczy…","przeszukany"][st]||"?"}`;
 });
 
-canvas.addEventListener("click", async ev => {
-  const payout = document.getElementById("payout").value.trim();
-  if (!payout) { alert("Wpisz adres BTC"); return; }
-  await api("/api/register", {
-    worker_id: workerId,
-    name: document.getElementById("nick").value.trim() || workerId,
-    payout_address: payout,
-    mode: document.getElementById("mode").value
-  });
-  const bin_id = binFromEvent(ev);
-  const res = await api("/api/claim", {worker_id: workerId, bin_id});
-  if (res.status === "ok") {
-    alert(`Zarezerwowano kwadracik #${bin_id}\nUruchom worker lokalnie!`);
-  } else {
-    alert(res.error || res.message || JSON.stringify(res));
-  }
-  refresh();
+canvas.addEventListener("click", ev => {
+  if (activeClaim) { alert("Najpierw Stop albo poczekaj na koniec"); return; }
+  beginClaim(binFromEvent(ev));
 });
 
-document.getElementById("btnStart").onclick = async () => {
-  const payout = document.getElementById("payout").value.trim();
-  if (!payout) { alert("Wpisz adres BTC"); return; }
-  await api("/api/register", {
-    worker_id: workerId, name: document.getElementById("nick").value.trim() || workerId,
-    payout_address: payout, mode: document.getElementById("mode").value
-  });
-  const res = await api("/api/claim", {worker_id: workerId});
-  if (res.status === "ok") alert(`Batch #${res.bin_id} — uruchom worker lokalnie`);
-  else alert(res.error || res.message || JSON.stringify(res));
-  refresh();
+document.getElementById("btnStart").onclick = () => {
+  if (activeClaim) return;
+  beginClaim(null);
 };
 
-document.getElementById("btnWorker").onclick = () => {
-  const payout = document.getElementById("payout").value.trim() || "TWOJ_ADRES_BTC";
-  const mode = document.getElementById("mode").value;
-  const nick = document.getElementById("nick").value.trim() || "miner";
-  const cmd = `python worker.py ${apiBase()} ${payout} ${mode} ${nick}`;
-  navigator.clipboard.writeText(cmd);
-  document.getElementById("workerCmd").innerHTML = "Skopiowano: <code>" + cmd + "</code>";
+document.getElementById("btnStop").onclick = async () => {
+  if (activeClaim && searchWorker) {
+    searchWorker.postMessage({cmd:"stop"});
+  }
 };
 
 async function refresh() {
@@ -195,12 +287,11 @@ async function refresh() {
     document.getElementById("done").textContent = statusData.bins_done;
     document.getElementById("active").textContent = statusData.bins_active;
     document.getElementById("free").textContent = statusData.bins_free;
-    document.getElementById("treasury").textContent = statusData.treasury_address;
     drawMap(statusData.map_status);
     const w = statusData.workers || [];
     document.getElementById("workers").innerHTML = w.length
-      ? "<b>Top minerzy:</b><br>" + w.slice(0,10).map(x =>
-          `${x.name} · ${x.mode} · ${x.keys_done} kluczy ${x.online?"🟢":""}`).join("<br>")
+      ? "<b>Minerzy:</b><br>" + w.slice(0,10).map(x =>
+          `${x.name} · ${x.mode} · ${fmtKeys(x.keys_done)} ${x.online?"🟢":""}`).join("<br>")
       : "";
     const fb = document.getElementById("foundBox");
     if (statusData.found) {
@@ -209,6 +300,7 @@ async function refresh() {
     }
   } catch(e) {}
 }
+
 refresh();
 setInterval(refresh, 2000);
 </script>

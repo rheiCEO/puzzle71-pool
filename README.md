@@ -1,10 +1,20 @@
 # puzzle71-pool
 
-Wspólna pula do Bitcoin Puzzle #71 — strona + serwer + lokalny worker (GPU/CPU).
+Wspólna pula Puzzle #71 — **wszystko w przeglądarce** (bez instalacji).
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/rheiCEO/puzzle71-pool)
 
-**1 klik deploy (free):** [Otwórz Blueprint na Render](https://dashboard.render.com/blueprint/new?repo=https://github.com/rheiCEO/puzzle71-pool) → **Apply**
+**Deploy free:** [Render Blueprint → Apply](https://dashboard.render.com/blueprint/new?repo=https://github.com/rheiCEO/puzzle71-pool)
+
+## Jak to działa (dla użytkownika)
+
+1. Wchodzisz na stronę
+2. Wpisujesz adres BTC
+3. Klikasz **Start** albo kwadracik na mapie
+4. **Przeglądarka liczy w tle** — zostaw kartę otwartą
+5. Mapa wspólna — wszyscy widzą postęp
+
+> Przeglądarka używa CPU (wolniej niż GPU). Zaawansowane: opcjonalny `worker.py` + CUDA.
 
 ## Nagrody (regulamin puli)
 

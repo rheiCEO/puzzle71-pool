@@ -308,17 +308,22 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = urlparse(self.path).path
-        if path in ("/", "/index.html"):
+        if path in ("/api", "/api/status", "/status"):
+            self._json(200, build_status())
+        elif path == "/health":
+            self._json(200, {"ok": True})
+        elif path in ("/", "/index.html"):
             if WEB.exists():
                 self._send(200, WEB.read_bytes(), "text/html; charset=utf-8")
             else:
                 self._send(404, b"missing web/index.html", "text/plain")
-        elif path in ("/api", "/api/status", "/status"):
-            self._json(200, build_status())
-        elif path == "/health":
-            self._json(200, {"ok": True})
         else:
-            self._json(404, {"error": "not found"})
+            static = ROOT / "web" / path.lstrip("/")
+            if static.is_file() and static.resolve().parent == (ROOT / "web").resolve():
+                ctype = "application/javascript" if static.suffix == ".js" else "application/octet-stream"
+                self._send(200, static.read_bytes(), ctype)
+            else:
+                self._json(404, {"error": "not found"})
 
     def do_POST(self):
         path = urlparse(self.path).path
