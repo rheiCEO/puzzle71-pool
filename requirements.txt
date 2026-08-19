@@ -1,0 +1,2 @@
+# Serwer puli — tylko biblioteka standardowa Pythona.
+# CPU worker (opcjonalnie): pip install -r requirements-cpu.txt

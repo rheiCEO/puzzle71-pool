@@ -3,9 +3,12 @@ services:
     name: puzzle71-pool
     runtime: python
     plan: free
-    buildCommand: pip install -r requirements-cpu.txt || true
+    region: frankfurt
+    buildCommand: pip install -r requirements.txt
     startCommand: python server.py --host 0.0.0.0 --port $PORT
     envVars:
       - key: POOL_MAP_BINS
         value: 2500
+      - key: PYTHON_VERSION
+        value: "3.12.0"
     healthCheckPath: /health
