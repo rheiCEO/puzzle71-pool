@@ -1,0 +1,6 @@
+pool.db
+*.progress
+__pycache__/
+*.pyc
+.env
+telegram.env

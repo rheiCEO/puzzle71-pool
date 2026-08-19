@@ -1,0 +1,3 @@
+# opcjonalnie — tylko tryb CPU
+coincurve>=21.0.0
+pycryptodome>=3.20.0
