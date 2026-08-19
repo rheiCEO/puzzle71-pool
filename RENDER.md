@@ -1,6 +1,19 @@
 # Deploy na Render.com (FREE)
 
-## Krok 1 — konto
+## Najszybciej — 1 klik (Ty)
+
+**Nie da się zdeployować bez Twojego konta Render** — ale to dosłownie jeden klik:
+
+👉 **[Otwórz Blueprint → Apply](https://dashboard.render.com/blueprint/new?repo=https://github.com/rheiCEO/puzzle71-pool)**
+
+1. Zaloguj przez GitHub (jeśli trzeba)
+2. **Apply**
+3. Poczekaj ~2–3 min → status **Live**
+4. URL: `https://puzzle71-pool.onrender.com`
+
+---
+
+## Krok po kroku (alternatywa)
 
 1. Wejdź na https://render.com
 2. **Get Started** → zaloguj przez **GitHub**

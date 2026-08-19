@@ -2,6 +2,10 @@
 
 Wspólna pula do Bitcoin Puzzle #71 — strona + serwer + lokalny worker (GPU/CPU).
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/rheiCEO/puzzle71-pool)
+
+**1 klik deploy (free):** [Otwórz Blueprint na Render](https://dashboard.render.com/blueprint/new?repo=https://github.com/rheiCEO/puzzle71-pool) → **Apply**
+
 ## Nagrody (regulamin puli)
 
 - Puzzle: `1PWo3JeB9jrGwfHDNpdGK54CRas7fsVzXU` (~7.1 BTC)
