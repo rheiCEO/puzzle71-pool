@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: puzzle71-pool
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-cpu.txt || true
+    startCommand: python server.py --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: POOL_MAP_BINS
+        value: 2500
+    healthCheckPath: /health

@@ -363,7 +363,7 @@ class Handler(BaseHTTPRequestHandler):
 def main() -> None:
     ap = argparse.ArgumentParser(description="puzzle71-pool server")
     ap.add_argument("--host", default="0.0.0.0")
-    ap.add_argument("--port", type=int, default=8780)
+    ap.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8780")))
     args = ap.parse_args()
 
     init_db()
