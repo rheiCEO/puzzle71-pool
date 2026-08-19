@@ -1,0 +1,8 @@
+name = "puzzle71-pool"
+pages_build_output_dir = "web"
+compatibility_date = "2024-08-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "puzzle71-pool"
+database_id = "REPLACE_AFTER_D1_CREATE"

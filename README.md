@@ -8,7 +8,13 @@ Wspólna pula do Bitcoin Puzzle #71 — strona + serwer + lokalny worker (GPU/CP
 - Przy trafieniu: **3 BTC** → adres znalazcy, reszta → `1Ps8hoKzRjdZdDphFwBjm6qiAzDxFYXAFe`
 - Wypłata wymaga ręcznej/automatycznej obsługi klucza po znalezieniu (MVP: zapis + powiadomienie)
 
-## Szybki start (Windows)
+## Deploy strony (Cloudflare Pages)
+
+Frontend + API na **pages.dev** — instrukcja: [DEPLOY-PAGES.md](DEPLOY-PAGES.md)
+
+Po deploy worker łączy się z `https://puzzle71-pool.pages.dev` zamiast lokalnego serwera.
+
+## Szybki start (Windows, lokalny serwer Python)
 
 ### 1. Serwer (jedna maszyna — VPS / vast / PC)
 

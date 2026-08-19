@@ -63,8 +63,8 @@
         <input id="nick" placeholder="np. Kuba-RTX5080">
       </div>
       <div>
-        <label>URL serwera (zostaw jeśli lokalnie)</label>
-        <input id="serverUrl" value="">
+        <label>URL serwera API (puste = ta sama strona / Pages)</label>
+        <input id="serverUrl" value="" placeholder="https://puzzle71-pool.pages.dev">
       </div>
     </div>
     <div class="btns">
@@ -105,7 +105,9 @@ localStorage.setItem("pool_worker_id", workerId);
 
 function apiBase() {
   const v = document.getElementById("serverUrl").value.trim();
-  return v || window.location.origin;
+  if (v) return v.replace(/\/+$/, "");
+  // Cloudflare Pages: API w /api na tej samej domenie
+  return window.location.origin;
 }
 
 async function api(path, data) {
